@@ -1,7 +1,6 @@
-mod lexer;
-
 use std::env;
 use std::io::{self, Write};
+use lox::lexer;
 
 fn main() {
     //some comments here //

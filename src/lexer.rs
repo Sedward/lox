@@ -1,6 +1,6 @@
 
-use std::{iter::Peekable, str::Chars};
 
+use std::{iter::Peekable, str::Chars};
 
 
 #[derive(Debug, PartialEq)]
@@ -33,12 +33,13 @@ pub enum Token {
     String(String),
     Number(String),
 
-    // Identifiers.
+    // Keywords.
     And,
     Class,
     Else,
     False, Fun, For, If, Nil, Or,
     Print, Return, Super, This, True, Var, While,
+    Identifier(String)
     // End of file
     //Eof
 }
@@ -181,8 +182,8 @@ impl<'a> Lexer<'a> {
     }
 }
 
-fn lookup_identifier(identifer: &str) -> Option<Token>{
-    match identifer {
+fn lookup_keyword(keyword: &str) -> Option<Token>{
+    match keyword {
         "and" => Some(Token::And), 
         "class" => Some(Token::Class),
         "else" => Some(Token::Else), 
@@ -199,7 +200,7 @@ fn lookup_identifier(identifer: &str) -> Option<Token>{
         "this" => Some(Token::This),
         "var" => Some(Token::Var),
         "while" => Some(Token::While),
-        _ => Some(Token::Illegal)
+        _ => Some(Token::Identifier(keyword.to_string()))
     }
 }
 
@@ -246,4 +247,18 @@ mod tests {
         let expected = Token::String("This is a string".to_string());
         assert_eq!(token1, expected);
     }
+
+    #[test]
+    fn lexer_scans_single_tokens(){
+        let input = "var a = true\n
+        var b = \"hello\"";
+        let expected = vec![Token::Var, 
+        Token::Identifier("a".to_string()), 
+        Token::Equal, 
+        Token::True, 
+        Token::Var, 
+        Token::Identifier("b".to_string()),
+        Token::String("hello".to_string())];
+        let mut lexer = Lexer::new(&input);
+
 }
