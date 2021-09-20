@@ -5,8 +5,7 @@ use std::{iter::Peekable, str::Chars};
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    // Whitespace which will be ignored later
-    Whitespace,
+    // Illegal chars
     Illegal,
     // Single-character tokens.
     LeftParen,
@@ -81,9 +80,25 @@ impl<'a> Lexer<'a> {
             } else {
                 self.source_iter.next().unwrap();
                 self.current += 1
+            }
         }
-    }
         string
+    }
+    
+    fn consume_whitespace(&mut self){
+        
+        while let Some(&c) = self.source_iter.peek() {
+            let whitespace = vec![' ', '\r', '\t'];
+            if whitespace.contains(&c){
+                self.source_iter.next();
+                self.current += 1;
+            } else if c == '\n' {
+                self.source_iter.next();
+                self.line += 1;
+            } else {
+                break
+            }
+        }
     }
     
     fn read_number(&mut self, c: char) -> String {
@@ -101,17 +116,15 @@ impl<'a> Lexer<'a> {
     }
 
     fn scan_token(&mut self) -> Option<Token> {
+        
+        self.consume_whitespace();
 
         if let Some(c) = self.source_iter.next(){
         
             self.current += 1;
 
             match c{
-            ' ' | '\r' | '\t' => Some(Token::Whitespace), 
-            '\n' => {
-                self.line +=1;
-                Some(Token::Whitespace)
-            }
+            
             '!' => {
                 let next_char = self.source_iter.peek().unwrap();
                 if next_char == &'='{
@@ -166,7 +179,7 @@ impl<'a> Lexer<'a> {
             _ => {
                 if c.is_alphabetic(){
                     let identifer = self.read_identifier(c);
-                    lookup_identifier(&identifer)
+                    lookup_keyword(&identifer)
                 } else if c.is_digit(10) {
                     let number = self.read_number(c);
                     Some(Token::Number(number))
@@ -258,7 +271,14 @@ mod tests {
         Token::True, 
         Token::Var, 
         Token::Identifier("b".to_string()),
+        Token::Equal, 
         Token::String("hello".to_string())];
         let mut lexer = Lexer::new(&input);
+        for want_token in expected.iter(){
+            let got_token = lexer.next().unwrap();
+            assert_eq!(want_token, &got_token);
+            println!("got token {:?}, want token {:?}", got_token, want_token);
+        }
 
+    }
 }

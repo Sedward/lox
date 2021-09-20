@@ -1,25 +1,28 @@
 use std::env;
 use std::io::{self, Write};
-use lox::lexer;
+use lox::lexer::{Lexer};
 
 fn main() {
     //some comments here //
     let args: Vec<String> = env::args().collect();
-    if args.len() > 2 {
-        panic!("Usage: lox [script]")
-    } else if args.len() == 2 {
-        let file = &args[1];
-        run_file(file);
-    } else {
-        run_prompt();
+    match args.len() {
+        2 => {
+            let file = &args[1];
+            run_file(file);
+        }
+        1 => {
+            run_prompt();
+        }
+        _ => {
+            panic!("Usage: lox [script]");
+        }
     }
 }
 
-fn run_file(path: &String) {
-    print!("We got a file path {}\n", path);
+fn run_file(path: &str) {
+    println!("We got a file path {}", path);
 }
 
-#[allow(dead_code)]
 fn run_prompt() {
     print!("> ");
     let mut input = String::new();
@@ -27,5 +30,5 @@ fn run_prompt() {
     io::stdin()
         .read_line(&mut input)
         .expect("failed to read input");
-    let _lexer = lexer::Lexer::new(&input);
+    let _lexer = Lexer::new(&input);
 }
